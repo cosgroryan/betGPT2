@@ -1,0 +1,39 @@
+{
+    "extras": [
+      {
+        "markets": [
+          {
+            "entrants": [
+              {
+                "entrant_id": "string",
+                "entrant_name": "string",
+                "odds": {
+                  "fixed_place": 0,
+                  "fixed_win": 0
+                }
+              }
+            ],
+            "market_id": "string",
+            "market_name": "string",
+            "results": [
+              {
+                "entrant_id": "string",
+                "entrant_name": "string",
+                "position": 0,
+                "result_status": "string"
+              }
+            ]
+          }
+        ],
+        "meeting": {
+          "advertised_start": "2019-08-24T14:15:22Z",
+          "category": "string",
+          "country": "string",
+          "meeting_id": "string",
+          "meeting_name": "string",
+          "state": "string"
+        }
+      }
+    ],
+    "next_page_token": "string"
+  }

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #111316;
+            color: #e2e2e6;
+        }
+        /* Custom scrollbar for terminal feel */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #1a1c1f; }
+        ::-webkit-scrollbar-thumb { background: #2d3748; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed": "#e1e2ea",
+                      "on-tertiary-container": "#523200",
+                      "secondary": "#c4c6ce",
+                      "surface-variant": "#333538",
+                      "on-error-container": "#ffdad6",
+                      "on-tertiary-fixed": "#2a1700",
+                      "on-primary-fixed": "#002113",
+                      "surface-container-highest": "#333538",
+                      "surface-container-high": "#282a2d",
+                      "outline": "#86948a",
+                      "on-surface": "#e2e2e6",
+                      "on-tertiary-fixed-variant": "#653e00",
+                      "tertiary-fixed-dim": "#ffb95f",
+                      "surface-container-low": "#1a1c1f",
+                      "secondary-container": "#464950",
+                      "error": "#ffb4ab",
+                      "secondary-fixed-dim": "#c4c6ce",
+                      "error-container": "#93000a",
+                      "tertiary": "#ffb95f",
+                      "surface-container-lowest": "#0c0e11",
+                      "surface-container": "#1e2023",
+                      "on-primary-container": "#00422b",
+                      "background": "#111316",
+                      "on-secondary": "#2d3037",
+                      "on-secondary-container": "#b6b8c0",
+                      "primary-fixed-dim": "#4edea3",
+                      "on-surface-variant": "#bbcabf",
+                      "inverse-surface": "#e2e2e6",
+                      "on-error": "#690005",
+                      "inverse-primary": "#006c49",
+                      "on-background": "#e2e2e6",
+                      "surface-bright": "#37393d",
+                      "on-primary-fixed-variant": "#005236",
+                      "surface-dim": "#111316",
+                      "surface": "#111316",
+                      "on-secondary-fixed-variant": "#44474d",
+                      "outline-variant": "#3c4a42",
+                      "on-secondary-fixed": "#191c22",
+                      "on-primary": "#003824",
+                      "primary": "#4edea3",
+                      "tertiary-fixed": "#ffddb8",
+                      "tertiary-container": "#e29100",
+                      "inverse-on-surface": "#2f3034",
+                      "primary-fixed": "#6ffbbe",
+                      "surface-tint": "#4edea3",
+                      "primary-container": "#10b981",
+                      "on-tertiary": "#472a00"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "sm": "8px",
+                      "margin": "16px",
+                      "gutter": "12px",
+                      "md": "16px",
+                      "xs": "4px",
+                      "lg": "24px",
+                      "unit": "4px"
+              },
+              "fontFamily": {
+                      "data-md": ["JetBrains Mono"],
+                      "label-caps": ["Inter"],
+                      "data-lg": ["JetBrains Mono"],
+                      "body": ["Inter"],
+                      "h1": ["Inter"],
+                      "h2": ["Inter"]
+              },
+              "fontSize": {
+                      "data-md": ["13px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "data-lg": ["16px", {"lineHeight": "20px", "fontWeight": "600"}],
+                      "body": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "h2": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="font-body text-body bg-background selection:bg-primary selection:text-on-primary">
+<!-- TopNavBar -->
+<header class="bg-slate-950 border-b border-slate-800 flex justify-between items-center w-full px-4 h-12 fixed top-0 z-50">
+<div class="flex items-center gap-6">
+<span class="text-lg font-black italic text-emerald-500">VAL-TRACK TERMINAL</span>
+<nav class="hidden md:flex gap-4 items-center h-full">
+<a class="font-mono text-xs tracking-tight uppercase text-slate-500 hover:text-slate-200 transition-colors" href="#">Dashboard</a>
+<a class="font-mono text-xs tracking-tight uppercase text-emerald-500 border-b border-emerald-500 pb-2" href="#">Value Tracker</a>
+</nav>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 hover:bg-slate-900 transition-colors scale-95 active:opacity-80">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-900 transition-colors scale-95 active:opacity-80">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-900 transition-colors scale-95 active:opacity-80">
+<span class="material-symbols-outlined text-[18px]">update</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar (Left) -->
+<aside class="bg-slate-900 border-r border-slate-800 fixed left-0 top-12 h-[calc(100vh-48px)] flex flex-col z-40 w-64 hidden lg:flex">
+<div class="p-4 border-b border-slate-800">
+<div class="text-emerald-500 font-mono text-[11px] leading-tight font-bold">RACE CENTER</div>
+<div class="text-slate-500 font-mono text-[10px] leading-tight uppercase">Live Meetings</div>
+</div>
+<div class="flex flex-col flex-grow py-2">
+<div class="bg-slate-800 text-emerald-400 border-l-2 border-emerald-500 flex items-center px-3 py-2 cursor-pointer transition-all duration-75">
+<span class="material-symbols-outlined mr-3 text-sm">military_tech</span>
+<span class="font-mono text-[11px] leading-tight">Thoroughbred</span>
+</div>
+<div class="text-slate-500 flex items-center px-3 py-2 hover:text-slate-300 hover:bg-slate-800/50 cursor-pointer transition-all duration-75">
+<span class="material-symbols-outlined mr-3 text-sm">agriculture</span>
+<span class="font-mono text-[11px] leading-tight">Harness</span>
+</div>
+<div class="text-slate-500 flex items-center px-3 py-2 hover:text-slate-300 hover:bg-slate-800/50 cursor-pointer transition-all duration-75">
+<span class="material-symbols-outlined mr-3 text-sm">pets</span>
+<span class="font-mono text-[11px] leading-tight">Greyhound</span>
+</div>
+</div>
+<div class="mt-auto border-t border-slate-800 py-2">
+<div class="text-slate-500 flex items-center px-3 py-2 hover:text-slate-300 hover:bg-slate-800/50 cursor-pointer transition-all duration-75">
+<span class="material-symbols-outlined mr-3 text-sm">settings</span>
+<span class="font-mono text-[11px] leading-tight">Settings</span>
+</div>
+<div class="text-slate-500 flex items-center px-3 py-2 hover:text-slate-300 hover:bg-slate-800/50 cursor-pointer transition-all duration-75">
+<span class="material-symbols-outlined mr-3 text-sm">help</span>
+<span class="font-mono text-[11px] leading-tight">Support</span>
+</div>
+</div>
+</aside>
+<!-- SideNavBar (Right) -->
+<aside class="bg-slate-950 border-l border-slate-800 fixed right-0 top-12 h-[calc(100vh-48px)] flex flex-col z-40 w-72 hidden xl:flex">
+<div class="p-4 border-b border-slate-800">
+<div class="text-emerald-500 font-mono text-[10px] uppercase font-bold">MARKET FEED</div>
+<div class="text-slate-500 font-mono text-[10px] uppercase">Collapsible Data</div>
+</div>
+<div class="p-2 flex flex-col gap-1">
+<div class="text-emerald-500 font-bold border-b border-emerald-900 py-2 px-2 transition-opacity duration-200">
+<div class="flex justify-between items-center">
+<span class="font-mono text-[10px] uppercase">Market Movers</span>
+<span class="material-symbols-outlined text-xs">trending_up</span>
+</div>
+</div>
+<div class="text-slate-600 py-2 px-2 hover:text-emerald-400 transition-opacity duration-200 cursor-pointer">
+<div class="flex justify-between items-center">
+<span class="font-mono text-[10px] uppercase">Smart Money</span>
+<span class="material-symbols-outlined text-xs">payments</span>
+</div>
+</div>
+</div>
+<div class="flex-grow overflow-y-auto px-4 py-2 space-y-4">
+<!-- Simulated Market Feed -->
+<div class="border border-slate-800 p-2 bg-slate-900/50">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-mono text-emerald-500">FLEMTINGTON R7</span>
+<span class="text-[10px] font-mono text-slate-500">2m ago</span>
+</div>
+<div class="text-[11px] font-mono text-slate-300">Big bet $2.4k on <span class="text-white">BOLD RULER</span> @ 4.20</div>
+</div>
+<div class="border border-slate-800 p-2 bg-slate-900/50">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-mono text-emerald-500">ROSEHILL R4</span>
+<span class="text-[10px] font-mono text-slate-500">5m ago</span>
+</div>
+<div class="text-[11px] font-mono text-slate-300">Market support for <span class="text-white">SILENT FLIGHT</span> 12.0 -&gt; 8.5</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pt-16 pb-8 px-4 lg:ml-64 xl:mr-72 min-h-screen">
+<div class="max-w-5xl mx-auto space-y-6">
+<!-- Race Header Summary -->
+<div class="bg-surface-container border border-outline-variant p-4 flex flex-wrap justify-between items-end gap-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-primary text-on-primary font-mono text-[11px] px-1.5 py-0.5 rounded-sm font-bold">OFFICIAL</span>
+<h1 class="font-h1 text-h1 text-on-surface">RACE 7: THE CHAMPIONSHIP STAKES (1200m)</h1>
+</div>
+<p class="font-data-md text-data-md text-on-surface-variant uppercase">Randwick | Track: Good 4 | Rail: +3m Entire Circuit</p>
+</div>
+<div class="text-right">
+<div class="font-data-lg text-data-lg text-primary">WIN TIME: 1:09.42</div>
+<div class="font-data-md text-data-md text-on-surface-variant">Last 600m: 34.12s</div>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Main Results Table -->
+<div class="md:col-span-8 space-y-gutter">
+<div class="bg-surface-container border border-outline-variant">
+<div class="bg-surface-container-high px-3 py-2 border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">military_tech</span>
+                                Official Race Results
+                            </h2>
+<span class="font-data-md text-data-md text-primary">Status: Confirmed</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full font-mono text-left">
+<thead class="bg-surface-container-low text-[10px] uppercase text-slate-500 border-b border-outline-variant">
+<tr>
+<th class="px-4 py-2 font-medium">Pos</th>
+<th class="px-4 py-2 font-medium">#</th>
+<th class="px-4 py-2 font-medium">Runner</th>
+<th class="px-4 py-2 font-medium text-center">Barrier</th>
+<th class="px-4 py-2 font-medium">Margin</th>
+<th class="px-4 py-2 font-medium text-right">Time</th>
+</tr>
+</thead>
+<tbody class="text-[12px] divide-y divide-outline-variant">
+<tr class="hover:bg-slate-800/30 transition-colors bg-primary/5">
+<td class="px-4 py-3 font-bold text-primary">1ST</td>
+<td class="px-4 py-3 text-on-surface">4</td>
+<td class="px-4 py-3">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 bg-slate-700 flex items-center justify-center rounded">
+<img class="w-4 h-4 object-contain" data-alt="silk pattern for jockey with primary colors and stripes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKOn-M2e6skdlibGV5ODxJ3emFcThvKR885nAa48EVSW7rk_OhcFfYQOU324MIDp3kXoHey3gIyDthUjmymdVI4qOWnKM74_oTAE3k_PflL-qoNJuk8Ln7GJPEQ1KlZ69MMkVa0qbREzUtIRX9vhlUHbkpM9cmpQ3LKj200v5JD5FCwOnxeD8FJudjvg_kKBBg_nx9n1IWmlx6Q60LfH6O1gVj_CtjRvgbe2_KBzXVHNIldq-x-9iQmAFujyVjT7hKDIqyqvVIOE8"/>
+</div>
+<div>
+<div class="font-bold text-on-surface">VELOCITY PEAK</div>
+<div class="text-[10px] text-on-surface-variant">J: J. McDonald | T: C. Waller</div>
+</div>
+</div>
+</td>
+<td class="px-4 py-3 text-center text-on-surface-variant">7</td>
+<td class="px-4 py-3 text-on-surface-variant">-</td>
+<td class="px-4 py-3 text-right text-on-surface">1:09.42</td>
+</tr>
+<tr class="hover:bg-slate-800/30 transition-colors">
+<td class="px-4 py-3 font-bold text-on-surface">2ND</td>
+<td class="px-4 py-3 text-on-surface">12</td>
+<td class="px-4 py-3">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 bg-slate-700 flex items-center justify-center rounded">
+<img class="w-4 h-4 object-contain" data-alt="horse racing jockey silk pattern secondary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcoGMyQkEfcdqhbINzAYWOPBIWLgznf7YqynEs7k_9W9AqUYdq_NMuzNJHV0Ca5tYAUL51ySyEHJH_i_pm31qyJLBklFYFBO1Q42jdYXZPiTMtWW_Vww8uLVH9y1QWu6-dN8yevISCZ3U3qNKn9yv5ynaIygn5LwEsZrHqWpG8jLCiSncXck1C5kH5y6KBcEB7ASWG4IQ6uTcpQwD-p9SF357D5BI7vmskW0UlW-omC9PeyvwVFn1tnx5q-xR2XVtSvAHeD6Meads"/>
+</div>
+<div>
+<div class="font-bold text-on-surface">MIDNIGHT STORM</div>
+<div class="text-[10px] text-on-surface-variant">J: T. Berry | T: G. Waterhouse</div>
+</div>
+</div>
+</td>
+<td class="px-4 py-3 text-center text-on-surface-variant">3</td>
+<td class="px-4 py-3 text-on-surface-variant">0.4L</td>
+<td class="px-4 py-3 text-right text-on-surface">1:09.48</td>
+</tr>
+<tr class="hover:bg-slate-800/30 transition-colors">
+<td class="px-4 py-3 font-bold text-on-surface">3RD</td>
+<td class="px-4 py-3 text-on-surface">1</td>
+<td class="px-4 py-3">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 bg-slate-700 flex items-center justify-center rounded">
+<img class="w-4 h-4 object-contain" data-alt="horse racing jockey silk pattern tertiary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkLCHAzJm4X6Fea9kTRroDh1iXluHwQulM903aC9rNJUXtaBYTKNm9wSE_IlMo23k6HE4um_U48HEU_byeetVIXhQvQS2_LrdF7uHcP7GLfw9AoidQ61y7GCVlj1MG8JCcwrk-c0EoIP_YNDjB3Bj28orqSnRq3i3UmYp8I-uOr4wG818GbapHwAhB4YwqvHhIn1x43ivWrvYpgpxdEicLHPvfudOR3kalEy0n41wyDzJJ5nY-5HH983xU9M3dwXd8xghWlRPlyRI"/>
+</div>
+<div>
+<div class="font-bold text-on-surface">IRON HEART</div>
+<div class="text-[10px] text-on-surface-variant">J: Z. Purton | T: J. Cummings</div>
+</div>
+</div>
+</td>
+<td class="px-4 py-3 text-center text-on-surface-variant">11</td>
+<td class="px-4 py-3 text-on-surface-variant">1.2L</td>
+<td class="px-4 py-3 text-right text-on-surface">1:09.61</td>
+</tr>
+<tr class="hover:bg-slate-800/30 transition-colors">
+<td class="px-4 py-3 font-bold text-on-surface">4TH</td>
+<td class="px-4 py-3 text-on-surface">8</td>
+<td class="px-4 py-3">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 bg-slate-700 flex items-center justify-center rounded">
+<img class="w-4 h-4 object-contain" data-alt="horse racing jockey silk pattern quaternary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXnl9bYcGdV1pGOlAGudfo37e1BZZAJR5Fs-aGp5xEKFvweDQ3TnepQRyF5KGfvGYJzsJGEWKBcyOgB8J6qnQCMwmBbqFdYOiHT5FaaUgOkhX-wic0wgFkLuX6l3yW3_De2Kkpi_DYEaqI2b0_14RO8tUgEy9HotHlsqgneQBxXUym2aURvrt27dRerIM83WZPSLGYVjL0f6zXcjMcCjgFQmnxOkYOAx90tpYzgfeHw6lEDbWcg__YhmPv9izS-OVfzvSoT_XjT3U"/>
+</div>
+<div>
+<div class="font-bold text-on-surface">GILDED ROSE</div>
+<div class="text-[10px] text-on-surface-variant">J: N. Rawiller | T: B. Baker</div>
+</div>
+</div>
+</td>
+<td class="px-4 py-3 text-center text-on-surface-variant">2</td>
+<td class="px-4 py-3 text-on-surface-variant">1.3L</td>
+<td class="px-4 py-3 text-right text-on-surface">1:09.64</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Dividends Section -->
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+<div class="bg-surface-container-high border border-outline-variant p-3 flex flex-col justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Win</span>
+<div class="flex items-end justify-between mt-2">
+<span class="font-data-md text-data-md text-on-surface-variant">#4</span>
+<span class="font-data-lg text-data-lg text-primary">$4.50</span>
+</div>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 flex flex-col justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Place</span>
+<div class="flex items-end justify-between mt-2">
+<span class="font-data-md text-data-md text-on-surface-variant">#4</span>
+<span class="font-data-lg text-data-lg text-primary">$1.80</span>
+</div>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 flex flex-col justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Quinella</span>
+<div class="flex items-end justify-between mt-2">
+<span class="font-data-md text-data-md text-on-surface-variant">4 | 12</span>
+<span class="font-data-lg text-data-lg text-primary">$12.40</span>
+</div>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 flex flex-col justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Exacta</span>
+<div class="flex items-end justify-between mt-2">
+<span class="font-data-md text-data-md text-on-surface-variant">4 &gt; 12</span>
+<span class="font-data-lg text-data-lg text-primary">$28.10</span>
+</div>
+</div>
+<div class="bg-surface-container-high border border-outline-variant p-3 flex flex-col justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Trifecta</span>
+<div class="flex items-end justify-between mt-2">
+<span class="font-data-md text-data-md text-on-surface-variant">4-12-1</span>
+<span class="font-data-lg text-data-lg text-primary">$142.90</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Rail Column -->
+<div class="md:col-span-4 space-y-gutter">
+<!-- Model Accuracy Card -->
+<div class="bg-surface-container border border-primary/40 relative overflow-hidden">
+<!-- Hit Overlay Glow -->
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/10 blur-3xl -mr-12 -mt-12"></div>
+<div class="bg-primary/10 px-3 py-2 border-b border-primary/30 flex justify-between items-center">
+<h2 class="font-label-caps text-label-caps uppercase text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">stars</span>
+                                Model Performance
+                            </h2>
+<span class="font-mono text-[10px] text-primary/80">AI-V4 ENGINE</span>
+</div>
+<div class="p-4 space-y-4">
+<div>
+<div class="text-[10px] text-on-surface-variant font-mono uppercase mb-1">Race Selection</div>
+<div class="flex justify-between items-center">
+<span class="font-h2 text-h2 text-on-surface">Value Bet Result: <span class="text-primary">HIT</span></span>
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/50">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 pt-4 border-t border-outline-variant">
+<div>
+<div class="text-[10px] text-on-surface-variant font-mono uppercase mb-1">Daily Strike Rate</div>
+<div class="font-data-lg text-data-lg text-on-surface">38.0%</div>
+<!-- Mini Sparkline visualization -->
+<div class="mt-1 h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 38%"></div>
+</div>
+</div>
+<div>
+<div class="text-[10px] text-on-surface-variant font-mono uppercase mb-1">Session ROI</div>
+<div class="font-data-lg text-data-lg text-primary">+12.4%</div>
+<!-- Mini Sparkline visualization -->
+<div class="mt-1 h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 65%"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-3 border border-outline-variant">
+<div class="text-[10px] text-on-surface-variant font-mono uppercase mb-2">Market Efficiency vs Model</div>
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-mono text-slate-500">SP: $3.20</span>
+<span class="material-symbols-outlined text-xs text-slate-500">arrow_forward</span>
+<span class="text-[11px] font-mono text-primary">VAL: $5.80 (O)</span>
+</div>
+<p class="text-[10px] text-slate-500 mt-2 italic leading-tight">Value bet identified at $5.80 early market. Market closed tighter than predicted.</p>
+</div>
+</div>
+</div>
+<!-- Post-Race Analysis Module -->
+<div class="bg-surface-container border border-outline-variant p-4">
+<h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant mb-3">Replay Analytics</h3>
+<div class="relative group cursor-pointer border border-outline-variant rounded overflow-hidden aspect-video bg-black flex items-center justify-center">
+<img class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500" data-alt="dramatic wide shot of horse race finishing line with dust and speed blur" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxKOH3NJewuV0Eijt52M0UEgxyBFqQ1sGz4_fbCNjj_DurZWW1zstPEPsB50PdIzxlQ02lsD6BfJBGJcW5GEodYEOecCHWw__SopLon336KqIKAAdLwYr1FXCds7uWjawBj5LXi00jSNgsIvMcKaiRmPabCy67m3hUH-32nKUvKB5M4aKEmmSmOBcFVEjqGUXtyFo9gA4JteMG9fotc_XX92SPHjjdyMvjV45BF2wAFw_FdyA5OaboDK9kX4D0P5ENbbt10vVgzK0"/>
+<div class="relative z-10 w-12 h-12 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+<div class="absolute bottom-2 left-2 z-10 bg-black/60 px-2 py-1 text-[9px] font-mono uppercase tracking-widest">Official Replay: 1080p</div>
+</div>
+<div class="mt-4 space-y-2">
+<div class="flex justify-between text-[11px] font-mono border-b border-outline-variant pb-1">
+<span class="text-slate-500 uppercase">First 400m</span>
+<span class="text-on-surface">23.18s</span>
+</div>
+<div class="flex justify-between text-[11px] font-mono border-b border-outline-variant pb-1">
+<span class="text-slate-500 uppercase">Mid 400m</span>
+<span class="text-on-surface">22.84s</span>
+</div>
+<div class="flex justify-between text-[11px] font-mono border-b border-outline-variant pb-1">
+<span class="text-slate-500 uppercase">Final 400m</span>
+<span class="text-on-surface">23.40s</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Meta -->
+<div class="bg-surface-container-lowest p-3 border border-outline-variant flex flex-wrap justify-between items-center gap-4">
+<div class="flex gap-4">
+<span class="text-[10px] font-mono text-slate-600 uppercase">Server: SYD-02</span>
+<span class="text-[10px] font-mono text-slate-600 uppercase">Latency: 24ms</span>
+<span class="text-[10px] font-mono text-slate-600 uppercase">TS: 2023-10-24T15:42:11Z</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(78,222,163,0.5)]"></span>
+<span class="text-[10px] font-mono text-primary uppercase font-bold tracking-widest">Live Feed Active</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-slate-800 flex justify-around items-center h-16 z-50 px-2">
+<div class="flex flex-col items-center justify-center text-slate-500 py-1 transition-all active:opacity-80">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-mono uppercase mt-1">Dash</span>
+</div>
+<div class="flex flex-col items-center justify-center text-emerald-500 py-1 transition-all active:opacity-80 border-t-2 border-emerald-500 -mt-0.5">
+<span class="material-symbols-outlined">trending_up</span>
+<span class="text-[10px] font-mono uppercase mt-1">Tracker</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 py-1 transition-all active:opacity-80">
+<span class="material-symbols-outlined">schedule</span>
+<span class="text-[10px] font-mono uppercase mt-1">Live</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 py-1 transition-all active:opacity-80">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-mono uppercase mt-1">Profile</span>
+</div>
+</nav>
+</body></html>

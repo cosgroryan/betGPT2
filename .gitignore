@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+frontend/.env.local
+
+# Data & model artifacts
+data/raw/
+data/processed/
+models/artifacts/
+*.pkl
+*.parquet
+
+# Database
+data/*.db
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/.turbo/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #111316;
+            color: #e2e2e6;
+            overflow: hidden;
+        }
+        /* Custom scrollbar for terminal look */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #1a1c1f; }
+        ::-webkit-scrollbar-thumb { background: #3c4a42; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4edea3; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#e1e2ea",
+                        "on-tertiary-container": "#523200",
+                        "secondary": "#c4c6ce",
+                        "surface-variant": "#333538",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-primary-fixed": "#002113",
+                        "surface-container-highest": "#333538",
+                        "surface-container-high": "#282a2d",
+                        "outline": "#86948a",
+                        "on-surface": "#e2e2e6",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "surface-container-low": "#1a1c1f",
+                        "secondary-container": "#464950",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#c4c6ce",
+                        "error-container": "#93000a",
+                        "tertiary": "#ffb95f",
+                        "surface-container-lowest": "#0c0e11",
+                        "surface-container": "#1e2023",
+                        "on-primary-container": "#00422b",
+                        "background": "#111316",
+                        "on-secondary": "#2d3037",
+                        "on-secondary-container": "#b6b8c0",
+                        "primary-fixed-dim": "#4edea3",
+                        "on-surface-variant": "#bbcabf",
+                        "inverse-surface": "#e2e2e6",
+                        "on-error": "#690005",
+                        "inverse-primary": "#006c49",
+                        "on-background": "#e2e2e6",
+                        "surface-bright": "#37393d",
+                        "on-primary-fixed-variant": "#005236",
+                        "surface-dim": "#111316",
+                        "surface": "#111316",
+                        "on-secondary-fixed-variant": "#44474d",
+                        "outline-variant": "#3c4a42",
+                        "on-secondary-fixed": "#191c22",
+                        "on-primary": "#003824",
+                        "primary": "#4edea3",
+                        "tertiary-fixed": "#ffddb8",
+                        "tertiary-container": "#e29100",
+                        "inverse-on-surface": "#2f3034",
+                        "primary-fixed": "#6ffbbe",
+                        "surface-tint": "#4edea3",
+                        "primary-container": "#10b981",
+                        "on-tertiary": "#472a00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "margin": "16px",
+                        "gutter": "12px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "data-md": ["JetBrains Mono"],
+                        "label-caps": ["Inter"],
+                        "data-lg": ["JetBrains Mono"],
+                        "body": ["Inter"],
+                        "h1": ["Inter"],
+                        "h2": ["Inter"]
+                    },
+                    "fontSize": {
+                        "data-md": ["13px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "data-lg": ["16px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "body": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "h2": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-body text-body bg-background">
+<!-- TopNavBar -->
+<nav class="flex justify-between items-center w-full px-4 h-12 bg-slate-950 border-b border-slate-800 fixed top-0 left-0 z-50">
+<div class="flex items-center gap-8">
+<span class="text-lg font-black italic text-emerald-500 font-mono">VAL-TRACK TERMINAL</span>
+<div class="hidden md:flex gap-6">
+<a class="font-mono text-xs tracking-tight uppercase text-slate-500 hover:text-slate-200 transition-colors" href="#">Dashboard</a>
+<a class="font-mono text-xs tracking-tight uppercase text-emerald-500 border-b border-emerald-500 pb-1" href="#">Value Tracker</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-500 hover:bg-slate-900 transition-colors p-1 cursor-pointer">schedule</span>
+<span class="material-symbols-outlined text-slate-500 hover:bg-slate-900 transition-colors p-1 cursor-pointer">filter_list</span>
+<span class="material-symbols-outlined text-emerald-500 hover:bg-slate-900 transition-colors p-1 cursor-pointer">update</span>
+</div>
+</nav>
+<!-- SideNavBar (Left) - RACE CENTER -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] flex flex-col z-40 bg-slate-900 border-r border-slate-800 w-64">
+<div class="p-4 border-b border-slate-800">
+<div class="font-mono text-[11px] leading-tight text-emerald-500 font-bold tracking-widest uppercase">RACE CENTER</div>
+<div class="font-mono text-[10px] text-slate-500 mt-1 uppercase">Live Meetings</div>
+</div>
+<nav class="flex-1 overflow-y-auto py-2">
+<div class="bg-slate-800 text-emerald-400 border-l-2 border-emerald-500 flex items-center px-3 py-2 cursor-pointer transition-all duration-75">
+<span class="material-symbols-outlined text-sm mr-2">military_tech</span>
+<span class="font-mono text-[11px] leading-tight">Thoroughbred</span>
+</div>
+<div class="text-slate-500 flex items-center px-3 py-2 hover:bg-slate-800/50 hover:text-slate-300 cursor-pointer transition-all duration-75">
+<span class="material-symbols-outlined text-sm mr-2">agriculture</span>
+<span class="font-mono text-[11px] leading-tight">Harness</span>
+</div>
+<div class="text-slate-500 flex items-center px-3 py-2 hover:bg-slate-800/50 hover:text-slate-300 cursor-pointer transition-all duration-75">
+<span class="material-symbols-outlined text-sm mr-2">pets</span>
+<span class="font-mono text-[11px] leading-tight">Greyhound</span>
+</div>
+</nav>
+<div class="p-4 border-t border-slate-800 space-y-2">
+<div class="text-slate-500 flex items-center px-1 py-1 hover:text-slate-300 cursor-pointer text-[11px] font-mono">
+<span class="material-symbols-outlined text-sm mr-2">settings</span> Settings
+            </div>
+<div class="text-slate-500 flex items-center px-1 py-1 hover:text-slate-300 cursor-pointer text-[11px] font-mono">
+<span class="material-symbols-outlined text-sm mr-2">help</span> Support
+            </div>
+</div>
+</aside>
+<!-- SideNavBar (Right) - MARKET FEED -->
+<aside class="fixed right-0 top-12 h-[calc(100vh-48px)] flex flex-col z-40 bg-slate-950 border-l border-slate-800 w-72">
+<div class="p-4 border-b border-slate-800">
+<div class="font-mono text-[10px] uppercase text-emerald-500 font-bold tracking-widest">MARKET FEED</div>
+<div class="font-mono text-[10px] text-slate-600 uppercase">Collapsible Data</div>
+</div>
+<div class="p-4 space-y-6 flex-1 overflow-y-auto">
+<!-- Market Movers -->
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="font-mono text-[10px] text-emerald-500 font-bold">MARKET MOVERS</span>
+<span class="material-symbols-outlined text-emerald-500 text-xs">trending_up</span>
+</div>
+<!-- Hold % Chart -->
+<div class="space-y-2">
+<div class="flex justify-between font-mono text-[10px] text-slate-400">
+<span>HOLD %</span>
+<span class="text-emerald-400">42.5% TOP 3</span>
+</div>
+<div class="h-24 flex items-end gap-1">
+<div class="flex-1 bg-emerald-500/20 border-t-2 border-emerald-500" style="height: 80%"></div>
+<div class="flex-1 bg-slate-800" style="height: 40%"></div>
+<div class="flex-1 bg-emerald-500/20 border-t-2 border-emerald-500" style="height: 60%"></div>
+<div class="flex-1 bg-slate-800" style="height: 30%"></div>
+<div class="flex-1 bg-slate-800" style="height: 20%"></div>
+<div class="flex-1 bg-slate-800" style="height: 45%"></div>
+<div class="flex-1 bg-slate-800" style="height: 15%"></div>
+</div>
+</div>
+<!-- Bet % Chart -->
+<div class="space-y-2">
+<div class="flex justify-between font-mono text-[10px] text-slate-400">
+<span>BET VOLUME</span>
+<span class="text-emerald-400">HIGH</span>
+</div>
+<div class="h-12 flex items-end gap-1">
+<div class="flex-1 bg-emerald-400/50" style="height: 30%"></div>
+<div class="flex-1 bg-emerald-400/50" style="height: 90%"></div>
+<div class="flex-1 bg-emerald-400/50" style="height: 50%"></div>
+<div class="flex-1 bg-emerald-400/50" style="height: 70%"></div>
+<div class="flex-1 bg-emerald-400/50" style="height: 40%"></div>
+<div class="flex-1 bg-emerald-400/50" style="height: 60%"></div>
+<div class="flex-1 bg-emerald-400/50" style="height: 20%"></div>
+</div>
+</div>
+</div>
+<!-- Biggest Bet Card -->
+<div class="border border-emerald-500/30 bg-emerald-500/5 p-3 rounded-sm">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-emerald-500 text-sm">payments</span>
+<span class="font-mono text-[10px] text-emerald-500 font-bold uppercase">Biggest Bet</span>
+</div>
+<div class="text-2xl font-mono text-white font-bold">$5,000</div>
+<div class="flex justify-between items-end mt-1">
+<div class="font-mono text-[10px] text-slate-400">@ 4.20 ON #3</div>
+<div class="font-mono text-[9px] text-slate-500 uppercase">2m ago</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 mr-72 mt-12 p-gutter min-h-screen">
+<!-- Race Header -->
+<header class="bg-surface-container border border-outline-variant p-4 mb-gutter">
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<span class="bg-primary text-on-primary font-mono text-sm px-2 py-0.5 font-bold">R4</span>
+<h1 class="font-h1 text-h1 text-on-surface">RANDWICK - 'THE EVEREST'</h1>
+</div>
+<div class="flex gap-4 font-mono text-xs text-slate-400 uppercase tracking-wider">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">straighten</span> 1200M</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">terrain</span> GOOD 4</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">light_mode</span> SUNNY</span>
+</div>
+</div>
+<div class="text-right">
+<div class="font-mono text-[10px] text-slate-500 uppercase tracking-tighter">Starts In</div>
+<div class="text-3xl font-mono font-black text-emerald-500">04:22</div>
+</div>
+</div>
+</header>
+<!-- Tabs -->
+<div class="flex gap-1 mb-xs">
+<button class="bg-slate-800 text-emerald-500 font-mono text-[11px] px-6 py-2 border-t-2 border-emerald-500 font-bold uppercase">Value Analysis</button>
+<button class="bg-slate-900/50 text-slate-500 font-mono text-[11px] px-6 py-2 hover:text-slate-300 uppercase transition-colors">Form Guide</button>
+</div>
+<!-- Main Analysis Table -->
+<div class="border border-outline-variant bg-surface-container overflow-hidden">
+<table class="w-full text-left border-collapse font-mono text-[12px]">
+<thead>
+<tr class="bg-surface-container-high text-slate-400 uppercase text-[10px] border-b border-outline-variant">
+<th class="p-2 font-bold">#</th>
+<th class="p-2 font-bold">Bar</th>
+<th class="p-2 font-bold">Runner</th>
+<th class="p-2 font-bold">Jockey/Trainer</th>
+<th class="p-2 font-bold">Wgt</th>
+<th class="p-2 font-bold">ML Win%</th>
+<th class="p-2 font-bold">TAB Win</th>
+<th class="p-2 font-bold">Implied</th>
+<th class="p-2 font-bold">Value</th>
+<th class="p-2 font-bold">Fluctuation</th>
+<th class="p-2"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-800/50 transition-colors">
+<td class="p-2 font-bold text-emerald-500">3</td>
+<td class="p-2 text-slate-500">8</td>
+<td class="p-2">
+<div class="flex items-center gap-2">
+<span class="font-bold text-white uppercase tracking-tight">Nature Strip</span>
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+</div>
+</td>
+<td class="p-2 text-slate-400 leading-tight">J. McDonald<br/><span class="text-[10px]">C. Waller</span></td>
+<td class="p-2 text-slate-500">58.5</td>
+<td class="p-2 font-bold">28.5%</td>
+<td class="p-2 text-white">4.20</td>
+<td class="p-2 text-slate-400">23.8%</td>
+<td class="p-2 text-emerald-400 font-bold bg-emerald-500/5">+4.7</td>
+<td class="p-2">
+<svg class="w-16 h-4 stroke-emerald-500 fill-none overflow-visible">
+<polyline points="0,15 10,12 20,8 30,10 40,5 50,2 60,0" stroke-width="1.5"></polyline>
+</svg>
+</td>
+<td class="p-2"><span class="material-symbols-outlined text-sm text-emerald-500">trending_up</span></td>
+</tr>
+<!-- Row 2 -->
+<tr class="bg-slate-900/30 hover:bg-slate-800/50 transition-colors">
+<td class="p-2 font-bold text-slate-400">1</td>
+<td class="p-2 text-slate-500">2</td>
+<td class="p-2">
+<div class="flex items-center gap-2">
+<span class="font-bold text-white uppercase tracking-tight">Eduardo</span>
+<span class="w-2 h-2 rounded-full bg-slate-500"></span>
+</div>
+</td>
+<td class="p-2 text-slate-400 leading-tight">N. Rawiller<br/><span class="text-[10px]">J. Pride</span></td>
+<td class="p-2 text-slate-500">58.5</td>
+<td class="p-2 font-bold">12.0%</td>
+<td class="p-2 text-white">7.50</td>
+<td class="p-2 text-slate-400">13.3%</td>
+<td class="p-2 text-error font-bold bg-error/5">-1.3</td>
+<td class="p-2">
+<svg class="w-16 h-4 stroke-error fill-none overflow-visible">
+<polyline points="0,5 10,8 20,5 30,12 40,10 50,15 60,18" stroke-width="1.5"></polyline>
+</svg>
+</td>
+<td class="p-2"><span class="material-symbols-outlined text-sm text-error">trending_down</span></td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-800/50 transition-colors">
+<td class="p-2 font-bold text-slate-400">7</td>
+<td class="p-2 text-slate-500">5</td>
+<td class="p-2">
+<div class="flex items-center gap-2">
+<span class="font-bold text-white uppercase tracking-tight">Giga Kick</span>
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+</div>
+</td>
+<td class="p-2 text-slate-400 leading-tight">C. Williams<br/><span class="text-[10px]">C. Douglas</span></td>
+<td class="p-2 text-slate-500">53.0</td>
+<td class="p-2 font-bold">18.5%</td>
+<td class="p-2 text-white">6.50</td>
+<td class="p-2 text-slate-400">15.4%</td>
+<td class="p-2 text-emerald-400 font-bold bg-emerald-500/5">+3.1</td>
+<td class="p-2">
+<svg class="w-16 h-4 stroke-emerald-400 fill-none overflow-visible">
+<polyline points="0,10 15,12 30,5 45,8 60,2" stroke-width="1.5"></polyline>
+</svg>
+</td>
+<td class="p-2"><span class="material-symbols-outlined text-sm text-emerald-400">trending_up</span></td>
+</tr>
+<!-- Row 4 -->
+<tr class="bg-slate-900/30 hover:bg-slate-800/50 transition-colors">
+<td class="p-2 font-bold text-slate-400">2</td>
+<td class="p-2 text-slate-500">12</td>
+<td class="p-2">
+<div class="flex items-center gap-2">
+<span class="font-bold text-white uppercase tracking-tight">Lost And Running</span>
+<span class="w-2 h-2 rounded-full bg-slate-500"></span>
+</div>
+</td>
+<td class="p-2 text-slate-400 leading-tight">H. Bowman<br/><span class="text-[10px]">J. O'Shea</span></td>
+<td class="p-2 text-slate-500">58.5</td>
+<td class="p-2 font-bold">10.0%</td>
+<td class="p-2 text-white">11.00</td>
+<td class="p-2 text-slate-400">9.1%</td>
+<td class="p-2 text-emerald-400 font-bold bg-emerald-500/5">+0.9</td>
+<td class="p-2">
+<svg class="w-16 h-4 stroke-slate-500 fill-none overflow-visible">
+<polyline points="0,10 20,10 40,8 60,10" stroke-width="1.5"></polyline>
+</svg>
+</td>
+<td class="p-2"><span class="material-symbols-outlined text-sm text-slate-500">horizontal_rule</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Speedmap Visualization -->
+<div class="mt-gutter grid grid-cols-1 md:grid-cols-4 gap- gutter h-32 border border-outline-variant bg-slate-950 p-2 relative">
+<div class="absolute inset-0 grid grid-cols-4 pointer-events-none">
+<div class="border-r border-slate-800/50 h-full"></div>
+<div class="border-r border-slate-800/50 h-full"></div>
+<div class="border-r border-slate-800/50 h-full"></div>
+</div>
+<!-- Lead -->
+<div class="flex flex-col items-center justify-start space-y-1 z-10">
+<span class="font-mono text-[9px] text-slate-600 uppercase mb-2">Lead</span>
+<div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center font-bold text-black border-2 border-white shadow-lg">1</div>
+<div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-emerald-500 border border-emerald-500/30">3</div>
+</div>
+<!-- O/Speed -->
+<div class="flex flex-col items-center justify-start space-y-1 z-10 pt-4">
+<span class="font-mono text-[9px] text-slate-600 uppercase mb-2">On Speed</span>
+<div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-400 border border-slate-700">7</div>
+</div>
+<!-- Mid -->
+<div class="flex flex-col items-center justify-center space-y-1 z-10">
+<span class="font-mono text-[9px] text-slate-600 uppercase mb-2">Midfield</span>
+<div class="flex gap-1">
+<div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-400 border border-slate-700">2</div>
+<div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-400 border border-slate-700">5</div>
+</div>
+</div>
+<!-- Back -->
+<div class="flex flex-col items-center justify-end space-y-1 z-10 pb-4">
+<span class="font-mono text-[9px] text-slate-600 uppercase mb-2">Back</span>
+<div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-400 border border-slate-700">9</div>
+</div>
+</div>
+</main>
+</body></html>

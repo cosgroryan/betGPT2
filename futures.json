@@ -1,0 +1,79 @@
+{
+    "meetings": [
+      {
+        "category": "string",
+        "category_name": "string",
+        "club_day": 0,
+        "club_mnemonic": "string",
+        "comp_close_date": "string",
+        "comp_complete_date": "string",
+        "comp_day": 0,
+        "comp_mnemonic": "string",
+        "comp_sell_date": "string",
+        "country": "string",
+        "daily_double": [
+          0
+        ],
+        "date": "2019-08-24T14:15:22Z",
+        "early_quaddie": [
+          0
+        ],
+        "fob_close_date": "string",
+        "fob_club_day": 0,
+        "fob_complete_date": "string",
+        "fob_mnemonic": "string",
+        "fob_sell_date": "string",
+        "is_fob_meeting": true,
+        "jetbet_club_name": "string",
+        "jetbet_track_name": "string",
+        "meeting": "string",
+        "meeting_date": "string",
+        "meeting_type": "string",
+        "name": "string",
+        "quaddie": [
+          0
+        ],
+        "races": [
+          {
+            "country": "string",
+            "distance": 0,
+            "id": "string",
+            "name": "string",
+            "protest": true,
+            "protest_reason": "string",
+            "race_number": 0,
+            "start_time": "2019-08-24T14:15:22Z",
+            "state": "string",
+            "status": "string",
+            "tote_start_time": "string",
+            "track_condition": "string",
+            "weather": "string"
+          }
+        ],
+        "sell_date": "string",
+        "state": "string",
+        "tote_meeting_number": 0,
+        "tote_raceday_date": "string",
+        "tote_running_double": [
+          [
+            0
+          ]
+        ],
+        "tote_status": "string",
+        "tote_treble": [
+          [
+            0
+          ]
+        ],
+        "track_condition": "string",
+        "track_mnemonic": "string",
+        "treble": [
+          0
+        ],
+        "video_channel": 0,
+        "video_channels": [
+          "string"
+        ]
+      }
+    ]
+  }

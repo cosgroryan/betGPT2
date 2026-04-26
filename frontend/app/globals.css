@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+/* ── Turf Terminal design tokens ─────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --surface:                  #111316;
+  --surface-dim:              #111316;
+  --surface-bright:           #37393d;
+  --surface-container-lowest: #0c0e11;
+  --surface-container-low:    #1a1c1f;
+  --surface-container:        #1e2023;
+  --surface-container-high:   #282a2d;
+  --surface-container-highest:#333538;
+
+  /* Text */
+  --on-surface:               #e2e2e6;
+  --on-surface-variant:       #bbcabf;
+  --inverse-surface:          #e2e2e6;
+  --inverse-on-surface:       #2f3034;
+
+  /* Borders */
+  --outline:                  #86948a;
+  --outline-variant:          #3c4a42;
+
+  /* Brand */
+  --primary:                  #4edea3;
+  --on-primary:               #003824;
+  --primary-container:        #10b981;
+  --on-primary-container:     #00422b;
+  --inverse-primary:          #006c49;
+
+  /* Secondary */
+  --secondary:                #c4c6ce;
+  --on-secondary:             #2d3037;
+  --secondary-container:      #464950;
+  --on-secondary-container:   #b6b8c0;
+
+  /* Tertiary / amber */
+  --tertiary:                 #ffb95f;
+  --on-tertiary:              #472a00;
+  --tertiary-container:       #e29100;
+
+  /* Error */
+  --error:                    #ffb4ab;
+  --error-container:          #93000a;
+
+  /* Semantic aliases used in components */
+  --value-positive:           #4edea3;
+  --value-negative:           #ef4444;
+  --value-neutral:            #f59e0b;
+  --table-stripe:             #1e2229;
+  --border:                   #2d3748;
+}
+
+@theme inline {
+  --color-surface:            var(--surface);
+  --color-surface-low:        var(--surface-container-low);
+  --color-surface-container:  var(--surface-container);
+  --color-surface-high:       var(--surface-container-high);
+  --color-on-surface:         var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-primary:            var(--primary);
+  --color-primary-container:  var(--primary-container);
+  --color-on-primary:         var(--on-primary);
+  --color-secondary:          var(--secondary);
+  --color-tertiary:           var(--tertiary);
+  --color-error:              var(--error);
+  --color-outline:            var(--outline);
+  --color-outline-variant:    var(--outline-variant);
+  --color-border:             var(--border);
+  --color-value-positive:     var(--value-positive);
+  --color-value-negative:     var(--value-negative);
+  --color-value-neutral:      var(--value-neutral);
+  --font-ui:                  "Inter", system-ui, sans-serif;
+  --font-data:                "JetBrains Mono", "Fira Code", monospace;
+}
+
+/* ── Base ────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--surface);
+  color: var(--on-surface);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Typography ──────────────────────────────────────────────────── */
+.font-data { font-family: var(--font-data); }
+
+/* ── Scrollbar (dark terminal) ───────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface-container-lowest); }
+::-webkit-scrollbar-thumb { background: var(--surface-bright); border-radius: 3px; }
+
+/* ── Table ───────────────────────────────────────────────────────── */
+.tt-table thead tr {
+  background: var(--surface-container-high);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+.tt-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 120ms;
+}
+
+.tt-table tbody tr:nth-child(even) {
+  background: var(--table-stripe);
+}
+
+.tt-table tbody tr:hover {
+  background: #262b34;
+}
+
+.tt-table th,
+.tt-table td {
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+/* ── Panels ──────────────────────────────────────────────────────── */
+.tt-panel {
+  background: var(--surface-container-low);
+  border: 1px solid var(--border);
+}
+
+/* ── Value badge colours ─────────────────────────────────────────── */
+.edge-positive { color: var(--value-positive); }
+.edge-negative { color: var(--value-negative); }
+.edge-neutral  { color: var(--value-neutral); }
