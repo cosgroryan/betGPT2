@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { type ValueOpportunity, type Meeting } from "@/lib/api";
 import { edgeColor, edgeSign, formatOdds, formatProb, countdown, statusBadgeClass } from "@/lib/utils";
@@ -13,6 +13,12 @@ interface Props {
 
 export default function DashboardClient({ initialValue, initialMeetings }: Props) {
   const [minEdge, setMinEdge] = useState(3);
+  // Tick every 30s so countdown updates client-side without hydration mismatch
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
   const opps = initialValue.opportunities.filter((o) => o.value_edge >= minEdge);
 
   return (

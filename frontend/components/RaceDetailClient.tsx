@@ -127,10 +127,10 @@ export default function RaceDetailClient({ data }: Props) {
         {(money_tracker?.entrants ?? []).length > 0 && (
           <div className="px-3 py-2 border-b border-[#2d3748]">
             <p className="text-[10px] text-[#86948a] font-bold tracking-wider mb-2">BET VOLUME</p>
-            {(money_tracker?.entrants ?? []).slice(0, 8).map((e) => {
+            {(money_tracker?.entrants ?? []).slice(0, 8).map((e, i) => {
               const runner = runners.find((r) => r.entrant_id === e.entrant_id);
               return (
-                <div key={e.entrant_id} className="flex items-center gap-2 mb-1">
+                <div key={`${e.entrant_id}-${i}`} className="flex items-center gap-2 mb-1">
                   <span className="text-[11px] text-[#bbcabf] w-20 truncate">{runner?.name ?? "—"}</span>
                   <div className="flex-1 h-2 bg-[#1e2023]">
                     <div
