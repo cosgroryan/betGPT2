@@ -1,12 +1,19 @@
 """
 Data collection from TAB Affiliates API.
 
-Two modes:
-  - backfill(): historical races via /extras endpoint (pagination)
-  - snapshot_race(event_id): pre-race runner snapshot for live model input
-  - fetch_results(event_id): post-race results
+Confirmed API behaviour (from openapi.json + live testing 2026-04-26):
+  - All responses wrap payload under a `data` key  → response["data"]["meetings"]
+  - Meetings:    GET /meetings        params: category=T, country=AUS|NZ
+  - Race detail: GET /events/{id}     (NOT /{id})
+  - Extras:      GET /extras          params: categories=T, countries=AUS,NZ, date_from, date_to
+                 date window: 2 days max per request, 14 days max in the past
+  - Race list:   GET /list            params: meet_types=T, countries=AUS,NZ, date_from, date_to
+  - Country codes: AUS, NZ (not NZL)
 
-Filter: category=T (Thoroughbred), country in [AUS, NZL]
+Collection modes:
+  collect_day(d):     fetch all meetings + results for one date (≤ 14 days ago)
+  snapshot_race(eid): live pre-race runner snapshot
+  fetch_results(eid): post-race results
 """
 
 import json
@@ -33,12 +40,13 @@ HEADERS = {
     "Accept": "application/json",
     "User-Agent": "RyanCosgrove/1.0",
 }
-COUNTRIES = ["AUS", "NZL"]
-CATEGORY = "T"
+COUNTRIES = ["AUS", "NZ"]      # NZ not NZL — confirmed from API response
+CATEGORY = "T"                  # Thoroughbred
+MAX_LOOKBACK_DAYS = 13          # API hard limit is 14; use 13 to stay safe
 
 
 # ---------------------------------------------------------------------------
-# Low-level HTTP helpers
+# HTTP helper
 # ---------------------------------------------------------------------------
 
 def _get(path: str, params: dict | None = None, retries: int = 3) -> dict:
@@ -48,94 +56,166 @@ def _get(path: str, params: dict | None = None, retries: int = 3) -> dict:
             r = requests.get(url, headers=HEADERS, params=params, timeout=20)
             r.raise_for_status()
             return r.json()
-        except requests.HTTPError as e:
+        except requests.HTTPError:
             if r.status_code == 429:
-                wait = 2 ** attempt * 5
-                log.warning("Rate limited, waiting %ss", wait)
-                time.sleep(wait)
+                time.sleep(2 ** attempt * 5)
             elif r.status_code >= 500:
                 time.sleep(2 ** attempt)
+            elif r.status_code == 400:
+                body = {}
+                try:
+                    body = r.json()
+                except Exception:
+                    pass
+                err = (body.get("header") or {}).get("error", r.text[:120])
+                raise ValueError(f"API 400: {err}")
             else:
                 raise
-        except requests.RequestException as e:
+        except requests.RequestException:
             if attempt == retries - 1:
                 raise
             time.sleep(2 ** attempt)
-    raise RuntimeError(f"Failed to GET {url} after {retries} attempts")
+    raise RuntimeError(f"Failed GET {url} after {retries} attempts")
+
+
+def _unwrap(response: dict, key: str) -> list:
+    """Extract a list from either top-level or nested under 'data'."""
+    top = response.get(key)
+    if top is not None:
+        return top
+    return (response.get("data") or {}).get(key, [])
 
 
 # ---------------------------------------------------------------------------
-# Meetings list (live / today)
+# Meetings for a date
 # ---------------------------------------------------------------------------
 
 def fetch_meetings(target_date: Optional[date] = None) -> list[dict]:
-    """Return all T-category meetings for a given date (default: today)."""
+    """
+    Return all T-category AUS+NZ meetings for a given date.
+    The API allows dates within the last 13 days.
+    """
     if target_date is None:
         target_date = date.today()
-    date_str = target_date.isoformat()
 
-    meetings = []
+    days_ago = (date.today() - target_date).days
+    if days_ago > MAX_LOOKBACK_DAYS:
+        raise ValueError(
+            f"TAB API limit: {target_date} is {days_ago} days ago (max {MAX_LOOKBACK_DAYS})."
+        )
+
+    date_str = target_date.isoformat()
+    meetings: list[dict] = []
     for country in COUNTRIES:
-        data = _get("", params={"category": CATEGORY, "country": country, "date": date_str})
-        meetings.extend(data.get("meetings", []))
+        try:
+            data = _get(
+                "/meetings",
+                params={
+                    "category": CATEGORY,
+                    "country": country,
+                    "date_from": date_str,
+                    "date_to": date_str,
+                },
+            )
+            for m in _unwrap(data, "meetings"):
+                m["_country"] = country
+                meetings.append(m)
+        except Exception as e:
+            log.warning("fetch_meetings %s %s: %s", country, date_str, e)
 
     return meetings
 
 
 # ---------------------------------------------------------------------------
-# Full race detail (runners, odds, form, speedmap)
+# Full race/event detail
 # ---------------------------------------------------------------------------
 
 def fetch_race_detail(event_id: str) -> dict:
-    """Full race payload from /racing/{event_id} (the raceinfo schema)."""
-    return _get(f"/{event_id}")
+    """
+    Full race payload from /events/{id}.
+    Includes runners, odds, form, speedmap, money_tracker, big_bets, results.
+    """
+    return _get(
+        f"/events/{event_id}",
+        params={
+            "with_money_tracker": "true",
+            "with_big_bets": "true",
+            "with_biggest_bet": "true",
+        },
+    )
 
 
 # ---------------------------------------------------------------------------
-# Historical results via /extras
+# Extras (results) for a single date
 # ---------------------------------------------------------------------------
 
-def fetch_extras_page(
-    country: str,
-    date_from: str,
-    date_to: str,
-    page_token: Optional[str] = None,
-) -> dict:
-    params = {
-        "category": CATEGORY,
-        "country": country,
-        "date_from": date_from,
-        "date_to": date_to,
-    }
-    if page_token:
-        params["page_token"] = page_token
-    return _get("/extras", params=params)
+def fetch_extras_for_date(target_date: date) -> list[dict]:
+    """
+    Returns completed race extras (results + market data) for a single date.
+    Uses categories + countries params (plural, as per OpenAPI spec).
+    date_from and date_to must be within 2 days of each other.
+    """
+    date_str = target_date.isoformat()
+    try:
+        data = _get(
+            "/extras",
+            params={
+                "categories": CATEGORY,
+                "countries": ",".join(COUNTRIES),
+                "date_from": date_str,
+                "date_to": date_str,
+            },
+        )
+    except ValueError as e:
+        log.warning("extras %s: %s", date_str, e)
+        return []
+
+    return _unwrap(data, "extras")
 
 
 # ---------------------------------------------------------------------------
 # Persistence helpers
 # ---------------------------------------------------------------------------
 
-def _upsert_meeting(db: Session, meeting: dict, country: str):
-    mid = meeting.get("meeting") or meeting.get("meeting_id")
+def _safe_float(v) -> Optional[float]:
+    try:
+        return float(v) if v is not None else None
+    except (ValueError, TypeError):
+        return None
+
+
+def _parse_weight(w) -> Optional[float]:
+    if isinstance(w, dict):
+        return _safe_float(w.get("total"))
+    return _safe_float(w)
+
+
+def _upsert_meeting(db: Session, meeting_dict: dict, country: str):
+    mid = (
+        meeting_dict.get("meeting")
+        or meeting_dict.get("meeting_id")
+        or meeting_dict.get("id")
+    )
     if not mid:
-        return
+        return None
     obj = db.get(Meeting, mid)
     if obj is None:
         obj = Meeting(meeting_id=mid)
         db.add(obj)
-    obj.date = str(meeting.get("date", meeting.get("meeting_date", "")))[:10]
-    obj.name = meeting.get("name", "")
+    raw_date = meeting_dict.get("date", meeting_dict.get("meeting_date", ""))
+    obj.date = str(raw_date)[:10]
+    obj.name = meeting_dict.get("name", "")
     obj.country = country
-    obj.state = meeting.get("state", "")
-    obj.track_condition = meeting.get("track_condition", "")
+    obj.state = meeting_dict.get("state", "")
+    obj.track_condition = meeting_dict.get("track_condition", "")
     obj.category = CATEGORY
+    return mid
 
 
-def _upsert_race(db: Session, race: dict, meeting_id: str):
+def _upsert_race(db: Session, race: dict, meeting_id: str, country: str) -> Optional[str]:
     eid = race.get("id") or race.get("event_id")
     if not eid:
-        return
+        return None
     obj = db.get(Race, eid)
     if obj is None:
         obj = Race(event_id=eid)
@@ -145,52 +225,42 @@ def _upsert_race(db: Session, race: dict, meeting_id: str):
     obj.name = race.get("name", "")
     obj.distance = race.get("distance", 0)
     obj.status = race.get("status", "")
-    obj.start_time = str(race.get("start_time", race.get("advertised_start_string", "")))
+    obj.start_time = str(race.get("start_time", ""))
     obj.track_condition = race.get("track_condition", "")
     obj.weather = race.get("weather", "")
-    obj.country = race.get("country", "")
+    obj.country = country
+    return eid
 
 
 def _upsert_result(db: Session, event_id: str, result: dict):
-    eid_result = result.get("entrant_id")
+    eid = result.get("entrant_id")
+    if not eid:
+        return
     existing = (
         db.query(Result)
-        .filter(Result.event_id == event_id, Result.entrant_id == eid_result)
+        .filter(Result.event_id == event_id, Result.entrant_id == eid)
         .first()
     )
     if existing:
         return
-    db.add(
-        Result(
-            event_id=event_id,
-            entrant_id=eid_result,
-            name=result.get("entrant_name", result.get("name", "")),
-            position=result.get("position", 0),
-            runner_number=result.get("runner_number", 0),
-            barrier=result.get("barrier", 0),
-            margin_lengths=_safe_float(result.get("margin_length", 0)),
-            time_ran=_safe_float(result.get("time_ran", 0)),
-            winning_time=_safe_float(result.get("winning_time", 0)),
-        )
-    )
-
-
-def _safe_float(val) -> Optional[float]:
-    try:
-        return float(val) if val is not None else None
-    except (ValueError, TypeError):
-        return None
-
-
-def _parse_weight(w) -> Optional[float]:
-    """Parse weight string like '58.5' or dict with 'total'."""
-    if isinstance(w, dict):
-        return _safe_float(w.get("total"))
-    return _safe_float(w)
+    db.add(Result(
+        event_id=event_id,
+        entrant_id=eid,
+        name=result.get("entrant_name", result.get("name", "")),
+        position=result.get("position", 0),
+        runner_number=result.get("runner_number", 0),
+        barrier=result.get("barrier", 0),
+        margin_lengths=_safe_float(result.get("margin_length", 0)),
+        time_ran=_safe_float(result.get("time_ran", 0)),
+        winning_time=_safe_float(result.get("winning_time", 0)),
+    ))
 
 
 def _snapshot_runner(db: Session, event_id: str, runner: dict, money_tracker: dict):
     eid = runner.get("entrant_id")
+    if not eid:
+        return
+
     existing = (
         db.query(Runner)
         .filter(Runner.event_id == event_id, Runner.entrant_id == eid)
@@ -206,10 +276,15 @@ def _snapshot_runner(db: Session, event_id: str, runner: dict, money_tracker: di
     flucs = runner.get("flucs_with_timestamp", {})
     speedmap = runner.get("speedmap", {})
     open_fluc = _safe_float((flucs.get("open") or {}).get("fluc"))
-    current_fluc = _safe_float(odds.get("fixed_win"))
+    current_win = _safe_float(odds.get("fixed_win"))
     fluc_drift = None
-    if open_fluc and current_fluc and open_fluc > 0:
-        fluc_drift = (current_fluc - open_fluc) / open_fluc
+    if open_fluc and current_win and open_fluc > 0:
+        fluc_drift = (current_win - open_fluc) / open_fluc
+
+    weight_dict = runner.get("weight", {})
+    weight_allocated = None
+    if isinstance(weight_dict, dict):
+        weight_allocated = _safe_float(weight_dict.get("allocated"))
 
     data = dict(
         event_id=event_id,
@@ -224,7 +299,7 @@ def _snapshot_runner(db: Session, event_id: str, runner: dict, money_tracker: di
         age=runner.get("age"),
         sex=runner.get("sex", ""),
         weight_total=_parse_weight(runner.get("weight")),
-        weight_allocated=_safe_float((runner.get("weight") or {}).get("allocated") if isinstance(runner.get("weight"), dict) else None),
+        weight_allocated=weight_allocated,
         handicap_rating=_safe_float(runner.get("handicap_rating")),
         spr=_safe_float(runner.get("spr")),
         class_level=runner.get("class_level", ""),
@@ -232,7 +307,7 @@ def _snapshot_runner(db: Session, event_id: str, runner: dict, money_tracker: di
         is_first_start=bool(runner.get("first_start_indicator")),
         apprentice_indicator=runner.get("apprentice_indicator", ""),
         gear=runner.get("gear", ""),
-        tab_fixed_win=_safe_float(odds.get("fixed_win")),
+        tab_fixed_win=current_win,
         tab_fixed_place=_safe_float(odds.get("fixed_place")),
         tab_pool_win=_safe_float(odds.get("pool_win")),
         tab_pool_place=_safe_float(odds.get("pool_place")),
@@ -260,42 +335,45 @@ def _snapshot_runner(db: Session, event_id: str, runner: dict, money_tracker: di
         db.add(Runner(**data))
 
 
+def _compute_implied_probs(runners: list[dict]) -> list[float]:
+    raw = []
+    for r in runners:
+        fw = _safe_float((r.get("odds") or {}).get("fixed_win"))
+        raw.append((1 / fw) if fw and fw > 1 else 0.0)
+    total = sum(raw) or 1.0
+    return [p / total for p in raw]
+
+
 # ---------------------------------------------------------------------------
-# Public API
+# Public: live race snapshot
 # ---------------------------------------------------------------------------
 
 def snapshot_race(event_id: str) -> dict:
     """
-    Fetch live race detail, persist runners + market snapshot, return payload.
-    Called ~2 hours before jump and again every 90s until race status = closed.
+    Fetch live race detail and persist runner snapshot + market data.
+    The full payload is returned so the API server can serve it immediately.
     """
     payload = fetch_race_detail(event_id)
+
+    # Unwrap nested data if present
+    if "race" not in payload and "data" in payload:
+        payload = payload["data"]
+
     db = SessionLocal()
     try:
-        runners = payload.get("runners", [])
+        runners = _unwrap(payload, "runners") or payload.get("runners", [])
         money_tracker = payload.get("money_tracker", {})
+        implied = _compute_implied_probs(runners)
 
-        # Compute margin-removed implied probabilities across the field
-        raw_probs = []
-        for r in runners:
-            fw = _safe_float((r.get("odds") or {}).get("fixed_win"))
-            raw_probs.append((1 / fw) if fw and fw > 1 else 0.0)
-        total = sum(raw_probs) or 1.0
-        norm_probs = [p / total for p in raw_probs]
-
-        for runner, implied in zip(runners, norm_probs):
+        for runner, imp in zip(runners, implied):
             _snapshot_runner(db, event_id, runner, money_tracker)
-            # Write implied prob back
-            existing = (
+            obj = (
                 db.query(Runner)
-                .filter(
-                    Runner.event_id == event_id,
-                    Runner.entrant_id == runner.get("entrant_id"),
-                )
+                .filter(Runner.event_id == event_id, Runner.entrant_id == runner.get("entrant_id"))
                 .first()
             )
-            if existing:
-                existing.tab_implied_prob = implied
+            if obj:
+                obj.tab_implied_prob = imp
 
         db.commit()
     finally:
@@ -304,9 +382,15 @@ def snapshot_race(event_id: str) -> dict:
     return payload
 
 
+# ---------------------------------------------------------------------------
+# Public: post-race results
+# ---------------------------------------------------------------------------
+
 def fetch_and_store_results(event_id: str):
-    """Persist race results after the race settles."""
     payload = fetch_race_detail(event_id)
+    if "data" in payload and "race" not in payload:
+        payload = payload["data"]
+
     results = payload.get("results", [])
     if not results:
         return
@@ -320,145 +404,146 @@ def fetch_and_store_results(event_id: str):
         db.close()
 
 
-def backfill(
-    date_from: str,
-    date_to: str,
-    delay: float = 0.5,
-):
-    """
-    Historical backfill via /extras.
-    date_from / date_to: ISO strings e.g. "2023-01-01"
+# ---------------------------------------------------------------------------
+# Public: collect one full race day
+# ---------------------------------------------------------------------------
 
-    For each completed meeting, also fetches full race detail so we capture
-    runner form data (needed for feature engineering at training time).
-    The raw_json column on Runner stores the full runner dict.
+def collect_day(target_date: date, delay: float = 0.5) -> dict:
+    """
+    Collect all AUS+NZ T-category race data for a single date.
+    Fetches meeting list → race detail for each event → persists runners + results.
     """
     init_db()
     db = SessionLocal()
-    total_races = 0
+    stats = {"races": 0, "runners": 0, "results": 0}
 
     try:
-        for country in COUNTRIES:
-            page_token = None
-            log.info("Backfilling %s from %s to %s", country, date_from, date_to)
+        meetings = fetch_meetings(target_date)
+        log.info("%s: %d meetings", target_date, len(meetings))
 
-            while True:
-                page = fetch_extras_page(country, date_from, date_to, page_token)
-                extras = page.get("extras", [])
+        for meeting in meetings:
+            country = meeting.get("_country") or meeting.get("country", "")
+            if country not in COUNTRIES:
+                continue
+            mid = _upsert_meeting(db, meeting, country)
+            db.commit()
 
-                for extra in extras:
-                    meeting = extra.get("meeting", {})
-                    mid = meeting.get("meeting_id", "")
-                    _upsert_meeting(db, meeting, country)
-
-                    for market in extra.get("markets", []):
-                        # extras gives us results but not full runner form.
-                        # Store results immediately; then fetch full detail.
-                        for result in market.get("results", []):
-                            # We need an event_id — derive from entrant context.
-                            # The extras endpoint doesn't give event_id directly;
-                            # we'll fetch the meeting's races separately below.
-                            pass
-
+            for race in meeting.get("races", []):
+                eid = _upsert_race(db, race, mid, country)
                 db.commit()
+                if not eid:
+                    continue
 
-                # For each meeting in this page, fetch today's race list
-                # to get event_ids, then fetch full race detail.
-                for extra in extras:
-                    meeting = extra.get("meeting", {})
-                    mid = meeting.get("meeting_id", "")
-                    meeting_date = str(meeting.get("advertised_start", ""))[:10]
+                status = race.get("status", "")
+                if status not in ("Resulted", "Paying", "Interim", "Final",
+                                  "Open", "Closed", "Suspended"):
+                    continue
 
-                    # Fetch meeting races via the meetings list endpoint
-                    try:
-                        meetings_data = _get(
-                            "",
-                            params={
-                                "category": CATEGORY,
-                                "country": country,
-                                "date": meeting_date,
-                            },
-                        )
-                    except Exception as e:
-                        log.warning("Could not fetch meeting list for %s: %s", mid, e)
-                        continue
+                try:
+                    raw = fetch_race_detail(eid)
+                    detail = raw.get("data", raw)  # unwrap if nested
+                    time.sleep(delay)
+                except Exception as e:
+                    log.warning("fetch_race_detail %s: %s", eid, e)
+                    continue
 
-                    for m in meetings_data.get("meetings", []):
-                        if m.get("meeting") != mid and m.get("name") != meeting.get("meeting_name"):
-                            continue
-                        for race in m.get("races", []):
-                            eid = race.get("id")
-                            if not eid:
-                                continue
-                            _upsert_race(db, race, mid)
-                            db.commit()
+                # Update race with full metadata
+                race_meta = detail.get("race", {})
+                race_obj = db.get(Race, eid)
+                if race_obj and race_meta:
+                    race_obj.distance = race_meta.get("distance", race_obj.distance)
+                    race_obj.track_surface = race_meta.get("track_surface", "")
+                    race_obj.track_direction = race_meta.get("track_direction", "")
+                    race_obj.rail_position = race_meta.get("rail_position", "")
+                    race_obj.class_level = race_meta.get("class", "")
+                    race_obj.field_size = race_meta.get("field_size", 0)
+                    pm = race_meta.get("prize_monies", {})
+                    if isinstance(pm, dict) and pm:
+                        race_obj.prize_money_first = float(next(iter(pm.values()), 0))
+                    race_obj.start_type = race_meta.get("start_type", "")
+                    race_obj.status = race_meta.get("status", race_obj.status)
+                    db.commit()
 
-                            if race.get("status") not in ("Paying", "Resulted", "Interim"):
-                                continue
-                            try:
-                                detail = fetch_race_detail(eid)
-                                money_tracker = detail.get("money_tracker", {})
+                # Runners
+                runners = detail.get("runners", [])
+                implied = _compute_implied_probs(runners)
+                for runner, imp in zip(runners, implied):
+                    _snapshot_runner(db, eid, runner, detail.get("money_tracker", {}))
+                    obj = (
+                        db.query(Runner)
+                        .filter(Runner.event_id == eid, Runner.entrant_id == runner.get("entrant_id"))
+                        .first()
+                    )
+                    if obj:
+                        obj.tab_implied_prob = imp
+                db.commit()
+                stats["runners"] += len(runners)
 
-                                raw_probs = []
-                                for r in detail.get("runners", []):
-                                    fw = _safe_float((r.get("odds") or {}).get("fixed_win"))
-                                    raw_probs.append((1 / fw) if fw and fw > 1 else 0.0)
-                                total = sum(raw_probs) or 1.0
-                                norm_probs = [p / total for p in raw_probs]
-
-                                for runner, implied in zip(detail.get("runners", []), norm_probs):
-                                    _snapshot_runner(db, eid, runner, money_tracker)
-                                    existing = (
-                                        db.query(Runner)
-                                        .filter(
-                                            Runner.event_id == eid,
-                                            Runner.entrant_id == runner.get("entrant_id"),
-                                        )
-                                        .first()
-                                    )
-                                    if existing:
-                                        existing.tab_implied_prob = implied
-
-                                for r in detail.get("results", []):
-                                    _upsert_result(db, eid, r)
-
-                                db.commit()
-                                total_races += 1
-                                time.sleep(delay)
-                            except Exception as e:
-                                log.warning("Error fetching race %s: %s", eid, e)
-                                db.rollback()
-
-                page_token = page.get("next_page_token")
-                if not page_token:
-                    break
-                time.sleep(delay)
+                # Results
+                for res in detail.get("results", []):
+                    _upsert_result(db, eid, res)
+                    stats["results"] += 1
+                db.commit()
+                stats["races"] += 1
 
     finally:
         db.close()
 
-    log.info("Backfill complete. Stored %d races.", total_races)
+    log.info("%s done: %s", target_date, stats)
+    return stats
 
+
+# ---------------------------------------------------------------------------
+# Collect the last N days
+# ---------------------------------------------------------------------------
+
+def collect_recent(days: int = 13, delay: float = 0.5) -> dict:
+    """
+    Seed the DB with the last `days` days (capped at API limit).
+    Run once on first setup, then use the daily scheduler going forward.
+    """
+    days = min(days, MAX_LOOKBACK_DAYS)
+    today = date.today()
+    total: dict[str, int] = {"races": 0, "runners": 0, "results": 0}
+
+    for i in range(days, -1, -1):
+        d = today - timedelta(days=i)
+        log.info("Collecting %s (%d/%d)...", d, days - i + 1, days + 1)
+        try:
+            stats = collect_day(d, delay=delay)
+            for k in total:
+                total[k] += stats[k]
+        except Exception as e:
+            log.warning("collect_day %s failed: %s", d, e)
+
+    log.info("collect_recent complete: %s", total)
+    return total
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     import argparse
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
     parser = argparse.ArgumentParser(description="TAB data collector")
     sub = parser.add_subparsers(dest="cmd")
 
-    bp = sub.add_parser("backfill")
-    bp.add_argument("--from", dest="date_from", required=True)
-    bp.add_argument("--to", dest="date_to", required=True)
-    bp.add_argument("--delay", type=float, default=0.5)
-
-    sp = sub.add_parser("snapshot")
+    sub.add_parser("seed", help="Collect last 13 days (max API window)")
+    dp = sub.add_parser("day", help="Collect a specific date (YYYY-MM-DD)")
+    dp.add_argument("date")
+    sp = sub.add_parser("snapshot", help="Live snapshot of a race")
     sp.add_argument("event_id")
 
     args = parser.parse_args()
-    if args.cmd == "backfill":
-        init_db()
-        backfill(args.date_from, args.date_to, args.delay)
+    if args.cmd == "seed":
+        collect_recent(13)
+    elif args.cmd == "day":
+        collect_day(date.fromisoformat(args.date))
     elif args.cmd == "snapshot":
-        init_db()
         snapshot_race(args.event_id)
+    else:
+        parser.print_help()

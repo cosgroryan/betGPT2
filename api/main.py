@@ -28,6 +28,7 @@ from sqlalchemy.orm import Session
 
 from api.collector import fetch_meetings, fetch_race_detail, fetch_and_store_results, snapshot_race
 from api.db import Race, Result, Runner, ValueBet, get_db, init_db
+from api.scheduler import create_scheduler
 from api.predictor import RunnerPrediction, predict_race, reload_artifacts
 
 log = logging.getLogger(__name__)
@@ -65,10 +66,21 @@ def _set_cache(event_id: str, payload: dict, predictions: list):
 # Startup
 # ---------------------------------------------------------------------------
 
+_scheduler = None
+
 @app.on_event("startup")
 def startup():
+    global _scheduler
     init_db()
     log.info("Database initialised")
+    _scheduler = create_scheduler(background=True)
+    _scheduler.start()
+    log.info("Background scheduler started")
+
+@app.on_event("shutdown")
+def shutdown():
+    if _scheduler:
+        _scheduler.shutdown(wait=False)
 
 
 # ---------------------------------------------------------------------------
